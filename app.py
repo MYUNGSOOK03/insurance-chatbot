@@ -3,7 +3,7 @@
 """
 import streamlit as st
 import os
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import FAISS
@@ -48,15 +48,30 @@ if not os.path.exists(PDF_FILE):
 def load_pdf_and_create_vectorstore():
     """PDF를 로드하고 벡터 데이터베이스를 생성"""
     try:
+        # PDF 파일 크기 확인
+        file_size = os.path.getsize(PDF_FILE)
+        st.info(f"📄 PDF 파일 크기: {file_size / 1024 / 1024:.2f} MB")
+        
+        if file_size == 0:
+            st.error("❌ PDF 파일이 비어있습니다.")
+            return None, 0
+        
         # PDF 읽기
         pdf_reader = PdfReader(PDF_FILE)
+        st.info(f"📖 PDF 페이지 수: {len(pdf_reader.pages)}")
+        
         text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
+        for i, page in enumerate(pdf_reader.pages):
+            page_text = page.extract_text()
+            text += page_text
+            if i == 0:  # 첫 페이지 샘플 출력
+                st.info(f"첫 페이지 텍스트 샘플: {page_text[:100]}...")
         
         if not text.strip():
-            st.error("PDF에서 텍스트를 추출할 수 없습니다.")
+            st.error("❌ PDF에서 텍스트를 추출할 수 없습니다.")
             return None, 0
+        
+        st.info(f"📝 추출된 텍스트 길이: {len(text)} 문자")
         
         # 텍스트 분할
         text_splitter = RecursiveCharacterTextSplitter(
@@ -65,6 +80,7 @@ def load_pdf_and_create_vectorstore():
             length_function=len
         )
         chunks = text_splitter.split_text(text)
+        st.info(f"✂️ 청크 분할 완료: {len(chunks)}개")
         
         # 벡터 데이터베이스 생성
         embeddings = OpenAIEmbeddings()
@@ -72,7 +88,9 @@ def load_pdf_and_create_vectorstore():
         
         return vectorstore, len(chunks)
     except Exception as e:
-        st.error(f"PDF 로딩 중 오류: {str(e)}")
+        st.error(f"❌ PDF 로딩 중 오류: {str(e)}")
+        import traceback
+        st.error(f"상세 오류:\n{traceback.format_exc()}")
         return None, 0
 
 # 벡터 데이터베이스 로드
