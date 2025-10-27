@@ -33,7 +33,15 @@ if not api_key:
 os.environ["OPENAI_API_KEY"] = api_key
 
 # PDF 파일 경로 (Streamlit Cloud용 상대 경로)
+import os
 PDF_FILE = "msook다이렉트웰빙건강보험_약관.pdf"
+
+# 파일 존재 확인
+if not os.path.exists(PDF_FILE):
+    st.error(f"❌ PDF 파일을 찾을 수 없습니다: {PDF_FILE}")
+    st.info(f"현재 디렉토리: {os.getcwd()}")
+    st.info(f"디렉토리 내 파일: {os.listdir('.')}")
+    st.stop()
 
 @st.cache_resource
 def load_pdf_and_create_vectorstore():
@@ -44,6 +52,10 @@ def load_pdf_and_create_vectorstore():
         text = ""
         for page in pdf_reader.pages:
             text += page.extract_text()
+        
+        if not text.strip():
+            st.error("PDF에서 텍스트를 추출할 수 없습니다.")
+            return None, 0
         
         # 텍스트 분할
         text_splitter = RecursiveCharacterTextSplitter(
