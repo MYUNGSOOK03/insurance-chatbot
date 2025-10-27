@@ -32,8 +32,8 @@ if not api_key:
 
 os.environ["OPENAI_API_KEY"] = api_key
 
-# PDF 파일 경로
-PDF_FILE = r"C:\portfolio\insurance_chatbot\msook다이렉트웰빙건강보험_약관.pdf"
+# PDF 파일 경로 (Streamlit Cloud용 상대 경로)
+PDF_FILE = "msook다이렉트웰빙건강보험_약관.pdf"
 
 @st.cache_resource
 def load_pdf_and_create_vectorstore():
