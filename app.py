@@ -34,7 +34,8 @@ os.environ["OPENAI_API_KEY"] = api_key
 
 # PDF 파일 경로 (Streamlit Cloud용 상대 경로)
 import os
-PDF_FILE = "msook다이렉트웰빙건강보험_약관.pdf"
+# PDF 파일 경로
+PDF_FILE = "insurance_policy.pdf"
 
 # 파일 존재 확인
 if not os.path.exists(PDF_FILE):
